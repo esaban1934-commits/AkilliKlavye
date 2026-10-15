@@ -1,0 +1,5 @@
+package tr.akilliklavye;
+import android.app.Activity; import android.os.Bundle; import android.content.Intent; import android.provider.Settings; import android.widget.*;
+public class MainActivity extends Activity {
+ public void onCreate(Bundle b){super.onCreate(b); LinearLayout l=new LinearLayout(this); l.setOrientation(1); l.setPadding(28,50,28,20); TextView t=new TextView(this);t.setText("Akıllı Klavye - İlk Test Sürümü\n\nAyarlar'dan klavyeyi etkinleştirip giriş yöntemi olarak seçin.");l.addView(t); Button a=new Button(this);a.setText("Klavyeyi etkinleştir");a.setOnClickListener(v->startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)));l.addView(a);Button c=new Button(this);c.setText("Klavyeyi seç");c.setOnClickListener(v->{android.view.inputmethod.InputMethodManager m=(android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);m.showInputMethodPicker();});l.addView(c);setContentView(l);}
+}
