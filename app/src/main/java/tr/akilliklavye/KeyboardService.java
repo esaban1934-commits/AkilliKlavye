@@ -9,6 +9,9 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.MotionEvent;
 import android.widget.Toast;
 import android.view.View;
 import android.view.inputmethod.InputConnection;
@@ -25,6 +28,11 @@ public class KeyboardService extends InputMethodService {
   private LinearLayout root, suggestions;
   private SpeechRecognizer speech;
   private boolean listening=false;
+  private final Handler deleteHandler=new Handler(Looper.getMainLooper());
+  private boolean deleting=false;
+  private final Runnable repeatDelete=new Runnable(){@Override public void run(){if(deleting){deleteOne();deleteHandler.postDelayed(this,65);}}};
+  private void deleteOne(){InputConnection ic=getCurrentInputConnection();if(ic!=null){CharSequence selected=ic.getSelectedText(0);if(selected!=null&&selected.length()>0)ic.commitText("",1);else ic.deleteSurroundingText(1,0);}refresh();}
+  private void stopDelete(){deleting=false;deleteHandler.removeCallbacks(repeatDelete);}
   private final Locale tr=new Locale("tr","TR");
   private final String[] words=("merhaba nasılsın nasılsınız günaydın iyi akşamlar teşekkür ederim rica lütfen tamam evet hayır bugün yarın dün şimdi sonra biraz çok güzel harika olur olacak olmadı neden nasıl nerede ne zaman kim hangi için ile ama çünkü ben sen biz siz onlar bizim sizin benim senin bana sana size bize burada orada geliyorum gidiyorum geleceğim gidiyorum gönderiyorum gönderildi gönderdim yazıyorum yazdım istiyorum istedim gerekli gerekiyor olabilir olabilir mi yardımcı olur musun müsait misin telefon klavye mesaj görüşürüz görüşmek üzere kolay gelsin iyi çalışmalar bilgi bilginize kontrol kontrolü kontrol edildi müşterimiz müşteri ürün ürünün ürünler ürünleri parça parçanın değişim değişimi değiştirilecek servis kayıt kaydı kaydın kayıtları firma firmaya firmadan çözüm sorun görsel görseli evrak arşiv iş emri teslimat teslim edildi işlemler işlemi işlem sonuç sonucunda açıklama açıklaması ekip ekibi çalışma çalışma arkadaşlar arkadaşımız merhabalar selam tamamdır bekliyorum bekleniyor beklenmektedir paylaşabilir paylaşabilir misiniz yapabilir yapabilir misin gerekiyor teşekkürler").split(" ");
   @Override public View onCreateInputView(){
@@ -41,7 +49,7 @@ public class KeyboardService extends InputMethodService {
     root.removeAllViews();
     suggestions=new LinearLayout(this);
     root.addView(suggestions);
-    String[] rows=symbols?new String[]{"1234567890","@#₺%&-+()","*':;!?"}:new String[]{"qwertyuıop","asdfghjklş","zxcvbnmöç"};
+    String[] rows=symbols?new String[]{"1234567890","@#₺%&-+()","*':;!?"}:new String[]{"qwertyuıopğü","asdfghjklşi","zxcvbnmöç"};
     for(int ri=0;ri<rows.length;ri++){
       LinearLayout line=new LinearLayout(this);
       for(char ch:rows[ri].toCharArray()){
@@ -52,16 +60,17 @@ public class KeyboardService extends InputMethodService {
       }
       if(ri==2){
         Button del=key("⌫",1);
-        del.setOnClickListener(v->{InputConnection ic=getCurrentInputConnection();if(ic!=null)ic.deleteSurroundingText(1,0);refresh();});
+        del.setOnTouchListener((v,event)->{switch(event.getActionMasked()){case MotionEvent.ACTION_DOWN:stopDelete();deleteOne();deleting=true;deleteHandler.postDelayed(repeatDelete,360);return true;case MotionEvent.ACTION_UP:case MotionEvent.ACTION_CANCEL:stopDelete();return true;default:return true;}});
         line.addView(del);
       }
       root.addView(line);
     }
-    if(!symbols){LinearLayout extras=new LinearLayout(this);for(String x:new String[]{"ğ","ü","i",",","."}){Button b=key(x,1);b.setOnClickListener(v->send(x));extras.addView(b);}root.addView(extras);}
     LinearLayout controls=new LinearLayout(this);
     Button mode=key(symbols?"ABC":"?123",1);mode.setOnClickListener(v->{symbols=!symbols;render();});controls.addView(mode);
     Button cap=key("⇧",1);cap.setOnClickListener(v->{shift=!shift;render();});controls.addView(cap);
+    Button comma=key(",",1);comma.setOnClickListener(v->send(","));controls.addView(comma);
     Button space=key("Boşluk",5);space.setOnClickListener(v->space());controls.addView(space);
+    Button dot=key(".",1);dot.setOnClickListener(v->send("."));controls.addView(dot);
     Button enter=key("↵",1);enter.setOnClickListener(v->send("\n"));controls.addView(enter);
     Button mic=key("🎤",1);mic.setOnClickListener(v->startVoice());controls.addView(mic);
     root.addView(controls);
@@ -162,6 +171,6 @@ public class KeyboardService extends InputMethodService {
     try{speech.startListening(intent);Toast.makeText(this,"Konuşabilirsiniz",Toast.LENGTH_SHORT).show();}
     catch(Exception e){Toast.makeText(this,"Sesli yazma başlatılamadı",Toast.LENGTH_SHORT).show();}
   }
-  @Override public void onDestroy(){if(speech!=null){speech.destroy();speech=null;}super.onDestroy();}
+  @Override public void onDestroy(){stopDelete();if(speech!=null){speech.destroy();speech=null;}super.onDestroy();}
   @Override public void onUpdateSelection(int oldSelStart,int oldSelEnd,int newSelStart,int newSelEnd,int candidatesStart,int candidatesEnd){super.onUpdateSelection(oldSelStart,oldSelEnd,newSelStart,newSelEnd,candidatesStart,candidatesEnd);refresh();}
 }
