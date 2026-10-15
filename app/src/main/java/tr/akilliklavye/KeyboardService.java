@@ -34,7 +34,7 @@ public class KeyboardService extends InputMethodService {
   private void deleteOne(){InputConnection ic=getCurrentInputConnection();if(ic!=null){CharSequence selected=ic.getSelectedText(0);if(selected!=null&&selected.length()>0)ic.commitText("",1);else ic.deleteSurroundingText(1,0);}refresh();}
   private void stopDelete(){deleting=false;deleteHandler.removeCallbacks(repeatDelete);}
   private final Locale tr=new Locale("tr","TR");
-  private final String[] words=("merhaba nasılsın nasılsınız günaydın iyi akşamlar teşekkür ederim rica lütfen tamam evet hayır bugün yarın dün şimdi sonra biraz çok güzel harika olur olacak olmadı neden nasıl nerede ne zaman kim hangi için ile ama çünkü ben sen biz siz onlar bizim sizin benim senin bana sana size bize burada orada geliyorum gidiyorum geleceğim gidiyorum gönderiyorum gönderildi gönderdim yazıyorum yazdım istiyorum istedim gerekli gerekiyor olabilir olabilir mi yardımcı olur musun müsait misin telefon klavye mesaj görüşürüz görüşmek üzere kolay gelsin iyi çalışmalar bilgi bilginize kontrol kontrolü kontrol edildi müşterimiz müşteri ürün ürünün ürünler ürünleri parça parçanın değişim değişimi değiştirilecek servis kayıt kaydı kaydın kayıtları firma firmaya firmadan çözüm sorun görsel görseli evrak arşiv iş emri teslimat teslim edildi işlemler işlemi işlem sonuç sonucunda açıklama açıklaması ekip ekibi çalışma çalışma arkadaşlar arkadaşımız merhabalar selam tamamdır bekliyorum bekleniyor beklenmektedir paylaşabilir paylaşabilir misiniz yapabilir yapabilir misin gerekiyor teşekkürler").split(" ");
+  private final String[] words=("deneyeceğim deneyeceksin deneyeceğiz denedim deniyorum deneme denemek düzelteceğim düzeltme düzelttim düzeliyor çalışıyor çalışmıyor çalışacak yapacağım yapacağım mı yazacağım yazacağım mı gelebilir geleceğim geleceksin geleceğiz merhaba nasılsın nasılsınız günaydın iyi akşamlar teşekkür ederim rica lütfen tamam evet hayır bugün yarın dün şimdi sonra biraz çok güzel harika olur olacak olmadı neden nasıl nerede ne zaman kim hangi için ile ama çünkü ben sen biz siz onlar bizim sizin benim senin bana sana size bize burada orada geliyorum gidiyorum geleceğim gidiyorum gönderiyorum gönderildi gönderdim yazıyorum yazdım istiyorum istedim gerekli gerekiyor olabilir olabilir mi yardımcı olur musun müsait misin telefon klavye mesaj görüşürüz görüşmek üzere kolay gelsin iyi çalışmalar bilgi bilginize kontrol kontrolü kontrol edildi müşterimiz müşteri ürün ürünün ürünler ürünleri parça parçanın değişim değişimi değiştirilecek servis kayıt kaydı kaydın kayıtları firma firmaya firmadan çözüm sorun görsel görseli evrak arşiv iş emri teslimat teslim edildi işlemler işlemi işlem sonuç sonucunda açıklama açıklaması ekip ekibi çalışma çalışma arkadaşlar arkadaşımız merhabalar selam tamamdır bekliyorum bekleniyor beklenmektedir paylaşabilir paylaşabilir misiniz yapabilir yapabilir misin gerekiyor teşekkürler").split(" ");
   @Override public View onCreateInputView(){
     root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);
     root.setPadding(3,4,3,4);root.setBackgroundColor(Color.rgb(220,224,230));
@@ -49,7 +49,7 @@ public class KeyboardService extends InputMethodService {
     root.removeAllViews();
     suggestions=new LinearLayout(this);
     root.addView(suggestions);
-    String[] rows=symbols?new String[]{"1234567890","@#₺%&-+()","*':;!?"}:new String[]{"qwertyuıopğü","asdfghjklşi","zxcvbnmöç"};
+    String[] rows=symbols?new String[]{"1234567890","@#₺%&-+()","*':;!?"}:new String[]{"qwertyuıopğ","asdfghjklşi","zxcvbnmöçü"};
     for(int ri=0;ri<rows.length;ri++){
       LinearLayout line=new LinearLayout(this);
       for(char ch:rows[ri].toCharArray()){
@@ -123,7 +123,7 @@ public class KeyboardService extends InputMethodService {
     String w=old.toLowerCase(tr);
     if(!w.isEmpty()&&!w.contains(" ")&&!java.util.Arrays.asList(words).contains(w)&&!cs.isEmpty()){
       String best=cs.get(0);
-      if(!best.startsWith(w)&&distance(w,best)==1&&w.length()>=4){replace(best,true);return;}
+      if(!best.startsWith(w)&&distance(w,best)<=2&&w.length()>=5){replace(best,true);return;}
     }
     send(" ");
   }
